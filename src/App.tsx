@@ -172,9 +172,9 @@ const About = () => {
           >
             <div className="absolute inset-0 border border-gold/30 translate-x-4 translate-y-4 z-0"></div>
             <img 
-              src="https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop" 
+              src="https://lh3.googleusercontent.com/p/AF1QipOlN0hmR7YYp_BvxX375gXCUrrApqSXta25Q0Iq=s1360-w1360-h1020-rw" 
               alt="Ambiente Selvático" 
-              className="w-full h-full object-cover relative z-10 grayscale-[20%] hover:grayscale-0 transition-all duration-700"
+              className="w-full h-full object-cover relative z-10 grayscale-[10%] hover:grayscale-0 transition-all duration-700"
               referrerPolicy="no-referrer"
             />
           </motion.div>
@@ -477,6 +477,75 @@ const Locations = () => {
 };
 
 const Reservation = () => {
+  const [restaurant, setRestaurant] = useState('Las Palmas - La Minilla');
+  const [date, setDate] = useState('');
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+
+  const schedules: Record<string, Record<number, { start: string, end: string } | null>> = {
+    'Las Palmas - La Minilla': {
+      1: null, // Lunes: Cerrado
+      2: { start: '13:00', end: '23:30' }, // Martes
+      3: { start: '13:00', end: '23:30' }, // Miércoles
+      4: { start: '13:00', end: '23:30' }, // Jueves
+      5: { start: '13:00', end: '01:00' }, // Viernes
+      6: { start: '13:00', end: '01:00' }, // Sábado
+      0: { start: '13:00', end: '17:00' }, // Domingo
+    },
+    'Puerto Rico - The Market': {
+      1: { start: '12:30', end: '24:00' }, // Lunes
+      2: { start: '12:30', end: '24:00' }, // Martes
+      3: { start: '12:30', end: '24:00' }, // Miércoles
+      4: { start: '12:30', end: '24:00' }, // Jueves
+      5: { start: '12:30', end: '01:00' }, // Viernes
+      6: { start: '12:30', end: '01:00' }, // Sábado
+      0: { start: '12:30', end: '24:00' }, // Domingo
+    }
+  };
+
+  useEffect(() => {
+    if (!date) {
+      setTimeSlots([]);
+      return;
+    }
+
+    const selectedDate = new Date(date);
+    const dayOfWeek = selectedDate.getDay();
+    const schedule = schedules[restaurant][dayOfWeek];
+
+    if (!schedule) {
+      setTimeSlots([]);
+      return;
+    }
+
+    const slots: string[] = [];
+    const [startH, startM] = schedule.start.split(':').map(Number);
+    const [endH, endM] = schedule.end.split(':').map(Number);
+
+    let currentH = startH;
+    let currentM = startM;
+
+    // Handle end time after midnight
+    const endTotalMinutes = (endH < startH ? endH + 24 : endH) * 60 + endM;
+
+    while (true) {
+      const currentTotalMinutes = (currentH < startH ? currentH + 24 : currentH) * 60 + currentM;
+      
+      if (currentTotalMinutes > endTotalMinutes) break;
+
+      const hStr = currentH.toString().padStart(2, '0');
+      const mStr = currentM.toString().padStart(2, '0');
+      slots.push(`${hStr}:${mStr}`);
+
+      currentM += 30;
+      if (currentM >= 60) {
+        currentH = (currentH + 1) % 24;
+        currentM = 0;
+      }
+    }
+
+    setTimeSlots(slots);
+  }, [restaurant, date]);
+
   return (
     <section id="reservations" className="py-24 bg-jungle-light relative border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -493,35 +562,41 @@ const Reservation = () => {
             <h3 className="text-4xl font-serif mb-8">Asegura tu mesa</h3>
             
             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Restaurante</label>
-                <div className="relative">
-                  <select className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none">
-                    <option>Las Palmas - La Minilla</option>
-                    <option>Puerto Rico - The Market</option>
-                  </select>
-                  <MapPin className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Restaurante</label>
+                  <div className="relative">
+                    <select 
+                      value={restaurant}
+                      onChange={(e) => setRestaurant(e.target.value)}
+                      className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none"
+                    >
+                      <option>Las Palmas - La Minilla</option>
+                      <option>Puerto Rico - The Market</option>
+                    </select>
+                    <MapPin className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Nombre completo</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors"
+                    placeholder="Ej. Juan Pérez"
+                  />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Nombre completo</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors"
-                  placeholder="Ej. Juan Pérez"
-                />
-              </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Fecha</label>
+                  <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Teléfono</label>
                   <div className="relative">
                     <input 
-                      type="date" 
-                      className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none"
+                      type="tel" 
+                      className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors"
+                      placeholder="+34 600 000 000"
                     />
-                    <Calendar className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
+                    <Phone className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
                   </div>
                 </div>
                 <div>
@@ -534,6 +609,41 @@ const Reservation = () => {
                       <option>5+ Personas</option>
                     </select>
                     <Users className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Fecha</label>
+                  <div className="relative">
+                    <input 
+                      type="date" 
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none"
+                    />
+                    <Calendar className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Hora</label>
+                  <div className="relative">
+                    <select 
+                      disabled={!date || timeSlots.length === 0}
+                      className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {!date ? (
+                        <option>Selecciona una fecha</option>
+                      ) : timeSlots.length === 0 ? (
+                        <option>Cerrado este día</option>
+                      ) : (
+                        timeSlots.map(slot => (
+                          <option key={slot} value={slot}>{slot}</option>
+                        ))
+                      )}
+                    </select>
+                    <Clock className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={20} />
                   </div>
                 </div>
               </div>
