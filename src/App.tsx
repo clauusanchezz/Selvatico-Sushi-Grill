@@ -480,6 +480,33 @@ const Reservation = () => {
   const [restaurant, setRestaurant] = useState('Las Palmas - La Minilla');
   const [date, setDate] = useState('');
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [guests, setGuests] = useState('2 Personas');
+  const [time, setTime] = useState('');
+  const [error, setError] = useState('');
+
+  const handleReservation = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!name || !phone || !date || !time) {
+      setError("Por favor, rellene todos los campos para solicitar la reserva.");
+      return;
+    }
+    
+    const message = `Hola, me gustaría solicitar una reserva en Selvático Sushi & Grill.
+Restaurante: ${restaurant}
+Nombre: ${name}
+Teléfono: ${phone}
+Personas: ${guests}
+Fecha: ${date}
+Hora: ${time}`;
+
+    const whatsappNumber = "34640679536";
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   const schedules: Record<string, Record<number, { start: string, end: string } | null>> = {
     'Las Palmas - La Minilla': {
@@ -544,6 +571,11 @@ const Reservation = () => {
     }
 
     setTimeSlots(slots);
+    if (slots.length > 0) {
+      setTime(slots[0]);
+    } else {
+      setTime('');
+    }
   }, [restaurant, date]);
 
   return (
@@ -561,7 +593,7 @@ const Reservation = () => {
             <h2 className="text-gold text-sm uppercase tracking-[0.3em] mb-4">Reservas</h2>
             <h3 className="text-4xl font-serif mb-8">Asegura tu mesa</h3>
             
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-6" onSubmit={handleReservation}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Restaurante</label>
@@ -581,6 +613,8 @@ const Reservation = () => {
                   <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Nombre completo</label>
                   <input 
                     type="text" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors"
                     placeholder="Ej. Juan Pérez"
                   />
@@ -593,6 +627,8 @@ const Reservation = () => {
                   <div className="relative">
                     <input 
                       type="tel" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                       className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors"
                       placeholder="+34 600 000 000"
                     />
@@ -602,7 +638,11 @@ const Reservation = () => {
                 <div>
                   <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Personas</label>
                   <div className="relative">
-                    <select className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none">
+                    <select 
+                      value={guests}
+                      onChange={(e) => setGuests(e.target.value)}
+                      className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none"
+                    >
                       <option>2 Personas</option>
                       <option>3 Personas</option>
                       <option>4 Personas</option>
@@ -630,6 +670,8 @@ const Reservation = () => {
                   <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Hora</label>
                   <div className="relative" title={!date ? "Introduzca primero la fecha" : ""}>
                     <select 
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
                       disabled={!date || timeSlots.length === 0}
                       className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -648,7 +690,13 @@ const Reservation = () => {
                 </div>
               </div>
               
-              <button className="w-full bg-gold text-ink py-4 uppercase tracking-widest font-medium hover:bg-gold-light transition-colors mt-4">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <button type="submit" className="w-full bg-gold text-ink py-4 uppercase tracking-widest font-medium hover:bg-gold-light transition-colors mt-4">
                 Solicitar Reserva
               </button>
               <p className="text-xs text-gray-500 text-center mt-4">
@@ -676,14 +724,22 @@ const Reservation = () => {
                   ¿Tienes alguna petición especial, alergia alimentaria o necesitas organizar un evento privado? Nuestro equipo está a tu disposición.
                 </p>
 
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold">
-                    <Phone size={24} />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+                      <Phone size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium mb-1">Teléfono Central</h4>
+                      <p className="text-gray-400 font-light">+34 928 023 547</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-white font-medium mb-1">Teléfono Central</h4>
-                    <p className="text-gray-400 font-light">+34 928 023 547</p>
-                  </div>
+                  <a 
+                    href="tel:+34928023547" 
+                    className="px-4 py-2 border border-gold text-gold hover:bg-gold hover:text-ink transition-colors uppercase tracking-widest text-xs"
+                  >
+                    Llamar
+                  </a>
                 </div>
                 
                 <div className="flex items-center gap-4">
@@ -705,27 +761,31 @@ const Reservation = () => {
   );
 };
 
-const Footer = () => {
+const Footer = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   return (
     <footer className="bg-ink-light py-12 border-t border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="font-serif text-2xl tracking-wider text-gold">
           SELVÁTICO
         </div>
         
         <div className="flex gap-6">
-          <a href="#" className="text-gray-400 hover:text-gold transition-colors">
+          <a href="https://www.instagram.com/selvaticogc" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gold transition-colors">
             <Instagram size={24} />
-          </a>
-          <a href="#" className="text-gray-400 hover:text-gold transition-colors">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
-            </svg>
           </a>
         </div>
         
-        <div className="text-gray-500 text-sm font-light">
-          &copy; {new Date().getFullYear()} Selvático Sushi & Grill. Todos los derechos reservados.
+        <div className="flex flex-col items-center md:items-end gap-3">
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-400">
+            <button onClick={() => onNavigate('aviso-legal')} className="hover:text-gold transition-colors">Aviso Legal</button>
+            <span className="hidden sm:inline">|</span>
+            <button onClick={() => onNavigate('privacidad')} className="hover:text-gold transition-colors">Política de Privacidad</button>
+            <span className="hidden sm:inline">|</span>
+            <button onClick={() => onNavigate('cookies')} className="hover:text-gold transition-colors">Política de Cookies</button>
+          </div>
+          <div className="text-gray-500 text-xs font-light text-center md:text-right">
+            &copy; {new Date().getFullYear()} Selvático Sushi & Grill. Todos los derechos reservados.
+          </div>
         </div>
       </div>
     </footer>
@@ -743,7 +803,9 @@ const FloatingButtons = () => {
         <Calendar size={24} />
       </a>
       <a 
-        href="#" 
+        href="https://wa.me/34640679536" 
+        target="_blank"
+        rel="noopener noreferrer"
         className="w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
         aria-label="Contactar por WhatsApp"
       >
@@ -753,7 +815,90 @@ const FloatingButtons = () => {
   );
 };
 
+const LegalPage = ({ title, content, onBack }: { title: string, content: React.ReactNode, onBack: () => void }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-ink text-white pt-32 pb-24">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="text-gold hover:text-gold-light transition-colors mb-8 flex items-center gap-2 uppercase tracking-widest text-sm"
+        >
+          &larr; Volver al inicio
+        </button>
+        <h1 className="text-4xl font-serif mb-12">{title}</h1>
+        <div className="prose prose-invert prose-gold max-w-none text-gray-300 space-y-6">
+          {content}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+
+  if (currentPage === 'aviso-legal') {
+    return (
+      <LegalPage 
+        title="Aviso Legal" 
+        onBack={() => setCurrentPage('home')}
+        content={
+          <>
+            <p>El presente aviso legal regula el uso del sitio web de Selvático Sushi & Grill.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">1. Datos Identificativos</h2>
+            <p>En cumplimiento con el deber de información recogido en artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y del Comercio Electrónico, a continuación se reflejan los siguientes datos: la empresa titular de dominio web es Selvático Sushi & Grill, con domicilio a estos efectos en Las Palmas de Gran Canaria.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">2. Usuarios</h2>
+            <p>El acceso y/o uso de este portal atribuye la condición de USUARIO, que acepta, desde dicho acceso y/o uso, las Condiciones Generales de Uso aquí reflejadas.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">3. Uso del Portal</h2>
+            <p>El sitio web proporciona el acceso a multitud de informaciones, servicios, programas o datos en Internet pertenecientes a Selvático Sushi & Grill o a sus licenciantes a los que el USUARIO pueda tener acceso.</p>
+          </>
+        }
+      />
+    );
+  }
+
+  if (currentPage === 'privacidad') {
+    return (
+      <LegalPage 
+        title="Política de Privacidad" 
+        onBack={() => setCurrentPage('home')}
+        content={
+          <>
+            <p>En Selvático Sushi & Grill respetamos su privacidad y estamos comprometidos a proteger sus datos personales.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">1. Información que recopilamos</h2>
+            <p>Recopilamos información personal que usted nos proporciona directamente al realizar una reserva, como su nombre, número de teléfono y cualquier otra información relevante para su visita.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">2. Uso de la información</h2>
+            <p>Utilizamos la información recopilada para gestionar sus reservas, comunicarnos con usted sobre su visita y mejorar nuestros servicios.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">3. Protección de datos</h2>
+            <p>Implementamos medidas de seguridad para mantener la seguridad de su información personal cuando realiza una reserva o accede a su información.</p>
+          </>
+        }
+      />
+    );
+  }
+
+  if (currentPage === 'cookies') {
+    return (
+      <LegalPage 
+        title="Política de Cookies" 
+        onBack={() => setCurrentPage('home')}
+        content={
+          <>
+            <p>Una cookie es un pequeño archivo de texto que se almacena en su navegador cuando visita casi cualquier página web. Su utilidad es que la web sea capaz de recordar su visita cuando vuelva a navegar por esa página.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">1. ¿Qué cookies utilizamos?</h2>
+            <p>En Selvático Sushi & Grill utilizamos cookies técnicas necesarias para el correcto funcionamiento de la página web y la gestión de reservas.</p>
+            <h2 className="text-2xl text-white mt-8 mb-4">2. Desactivación de cookies</h2>
+            <p>Puede usted permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su ordenador.</p>
+          </>
+        }
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-ink text-white selection:bg-gold selection:text-ink">
       <Navbar />
@@ -764,7 +909,7 @@ export default function App() {
       <Locations />
       <Reviews />
       <Reservation />
-      <Footer />
+      <Footer onNavigate={setCurrentPage} />
       <FloatingButtons />
     </div>
   );
