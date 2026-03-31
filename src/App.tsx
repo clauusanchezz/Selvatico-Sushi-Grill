@@ -401,7 +401,7 @@ const Locations = () => {
         { days: "Domingo", time: "13:00 – 17:00" },
         { days: "Lunes", time: "Cerrado" }
       ],
-      mapLink: "https://www.google.com/maps/search/?api=1&query=C.+Pintor+Juan+Guillermo,+6-8,+35011+Las+Palmas+de+Gran+Canaria"
+      mapLink: "https://www.google.com/maps/place/Selv%C3%A1tico+Sushi+%26+Grill/@28.1261218,-15.4428861,17z/data=!3m1!4b1!4m6!3m5!1s0xc40953f00f24fad:0x7f412f6e977763c0!8m2!3d28.1261219!4d-15.4380152!16s%2Fg%2F11q99ntzk_?entry=ttu&g_ep=EgoyMDI2MDMyNC4wIKXMDSoASAFQAw%3D%3D"
     },
     {
       name: "Puerto Rico - The Market",
@@ -628,7 +628,7 @@ const Reservation = () => {
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wider">Hora</label>
-                  <div className="relative">
+                  <div className="relative" title={!date ? "Introduzca primero la fecha" : ""}>
                     <select 
                       disabled={!date || timeSlots.length === 0}
                       className="w-full bg-ink border border-white/10 text-white px-4 py-3 focus:outline-none focus:border-gold transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
